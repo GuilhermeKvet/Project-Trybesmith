@@ -2,14 +2,14 @@ import { Pool, ResultSetHeader } from 'mysql2/promise';
 import { Product } from '../interfaces/Interfaces';
 
 export default class ProductModel {
-  public connecttion: Pool;
+  private connection: Pool;
 
   constructor(connection: Pool) {
-    this.connecttion = connection;
+    this.connection = connection;
   }
 
   public async getAll(): Promise<Product[]> {
-    const [row] = await this.connecttion.execute(
+    const [row] = await this.connection.execute(
       'SELECT * FROM Trybesmith.Products',
     );
     return row as Product[];
@@ -17,11 +17,18 @@ export default class ProductModel {
 
   public async registerProduct(product: Product): Promise<Product> {
     const { name, amount } = product;
-    const [dataInserted] = await this.connecttion.execute<ResultSetHeader>(
+    const [dataInserted] = await this.connection.execute<ResultSetHeader>(
       'INSERT INTO Trybesmith.Products (name, amount) VALUES (?, ?)',
       [name, amount],
     );
     const { insertId } = dataInserted;
     return { id: insertId, ...product };
+  }
+
+  public async update(orderId: number, productId: number): Promise<void> {
+    await this.connection.execute<ResultSetHeader>(
+      'UPDATE Trybesmith.Products SET orderId = ? WHERE id = ?',
+      [orderId, productId],
+    );
   }
 }

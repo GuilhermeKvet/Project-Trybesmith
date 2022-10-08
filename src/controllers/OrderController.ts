@@ -8,4 +8,11 @@ export default class OrderController {
     const orders = await this.orderService.getAll();
     res.status(200).json(orders);
   };
+
+  public registerOrder = async (req: Request, res: Response) => {
+    const token = req.header('Authorization');
+    const { productsIds } = req.body;
+    const newOrder = await this.orderService.registerOrder(token as string, productsIds);
+    res.status(201).json(newOrder);
+  };
 }

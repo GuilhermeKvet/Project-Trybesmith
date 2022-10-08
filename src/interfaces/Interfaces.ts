@@ -16,3 +16,15 @@ export interface Order {
   id?: number;
   userId?: number
 }
+
+export interface Token {
+  id: number;
+  username: string,
+  iat?: number
+}
+
+export interface InsertOrder {
+  id?: number;
+  userId: number;
+  productsIds: number[];
+} 

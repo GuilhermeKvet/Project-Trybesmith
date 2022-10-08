@@ -1,11 +1,13 @@
-import { Pool } from 'mysql2/promise';
-import { Order } from '../interfaces/Interfaces';
+import { Pool, ResultSetHeader } from 'mysql2/promise';
+import { InsertOrder, Order } from '../interfaces/Interfaces';
+import connection from './connection';
+import ProductModel from './ProductModel';
 
 export default class OrderModel {
   public connection: Pool;
 
-  constructor(connection: Pool) {
-    this.connection = connection;
+  constructor(conn: Pool) {
+    this.connection = conn;
   }
 
   public async getAll(): Promise<Order[]> {
@@ -17,5 +19,21 @@ export default class OrderModel {
       GROUP BY o.id`,
     );
     return row as Order[];
+  }
+
+  public async registerOrder(productsIds: number[], userId: number): Promise<InsertOrder> {
+    const productModel = new ProductModel(connection);
+
+    const [{ insertId }] = await this.connection.execute<ResultSetHeader>(
+      'INSERT INTO Trybesmith.Orders (userId) VALUES (?)',
+      [userId],
+    );
+    
+    const insertedProducts = productsIds
+      .map((productId) => productModel.update(insertId, productId));
+
+    Promise.all(insertedProducts);
+
+    return { userId, productsIds };
   }
 }

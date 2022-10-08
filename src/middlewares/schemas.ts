@@ -25,8 +25,13 @@ const validateUserSchema = Joi.object({
   }).required(),
 });
 
+const validateOrderSchema = Joi.object({
+  productsIds: Joi.array().items(Joi.number().required()).required(),
+});
+
 export = {
   validateLoginSchema,
   validateProductSchema,
   validateUserSchema,
+  validateOrderSchema,
 };
