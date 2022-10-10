@@ -1,7 +1,5 @@
 import { Pool, ResultSetHeader } from 'mysql2/promise';
 import { InsertOrder, Order } from '../interfaces/Interfaces';
-import connection from './connection';
-import ProductModel from './ProductModel';
 
 export default class OrderModel {
   public connection: Pool;
@@ -22,17 +20,16 @@ export default class OrderModel {
   }
 
   public async registerOrder(productsIds: number[], userId: number): Promise<InsertOrder> {
-    const productModel = new ProductModel(connection);
-
     const [{ insertId }] = await this.connection.execute<ResultSetHeader>(
       'INSERT INTO Trybesmith.Orders (userId) VALUES (?)',
       [userId],
     );
     
-    const insertedProducts = productsIds
-      .map((productId) => productModel.update(insertId, productId));
-
-    Promise.all(insertedProducts);
+    await Promise.all(productsIds
+      .map((productId) => this.connection.execute<ResultSetHeader>(
+        'UPDATE Trybesmith.Products SET orderId = ? WHERE id = ?',
+        [insertId, productId],
+      )));
 
     return { userId, productsIds };
   }

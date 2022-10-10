@@ -27,4 +27,4 @@ export interface InsertOrder {
   id?: number;
   userId: number;
   productsIds: number[];
-} 
+}
